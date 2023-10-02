@@ -1,11 +1,31 @@
-pipeline {
+pipeline{
     agent any
 
+    environment{
+        PATH = "/opt/maven/bin:$PATH"
+    }
     stages {
-        stage('Git Checkout') {
+        stage("Git Checkout") {
             steps {
                 git branch: 'main', url: 'https://github.com/Nandini-1428/kubernets_project/'
             }
+         }
+        stage("Build Maven"){
+          steps {
+            sh "mvn clean package"
+            sh "mv target/*war target/mywebsite.war"
+           }
         }
-    }
+       stage("deploy dev"){
+          sshagent(['ansible_server']) {
+            sh """
+              scp  -o StrictHostKeyChecking=no -l target/mywebsite.war ubuntu@35.174.113.195:/opt/tomcat8/webapps/
+              shh  ubuntu@35.174.113.195 /opt/tomcat8/bin/shutdown.sh
+              shh  ubuntu@35.174.113.195 /opt/tomcat8/bin/startup.sh
+            
+           """
+         }
+      }
+  }
 }
+
