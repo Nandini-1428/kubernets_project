@@ -16,7 +16,7 @@ pipeline{
             sh "mv target/*war target/mywebsite.war"
            }
         }
-       stage("deploy dev"){
+        stage("deploy dev"){
           sshagent(['ansible_server']) {
             sh """
               scp  -o StrictHostKeyChecking=no -l target/mywebsite.war ubuntu@35.174.113.195:/opt/tomcat8/webapps/
